@@ -1,14 +1,29 @@
-KYC Verification Backend
-🎯 What This Backend Does
-This backend implements a complete KYC (Know Your Customer) verification system that:
+🚀 KYC Verification Backend
 
-Receives data from frontend (name, document number, address, document type)
+A complete backend system for AI-powered KYC (Know Your Customer) Verification built using FastAPI.
+It processes user details, runs them through an ML pipeline, predicts fraud probability, and returns a structured verification result.
+
+🎯 What This Backend Does
+
+This backend implements a full KYC verification workflow:
+
+Receives data from the frontend (name, document number, address, document type)
+
 Loads trained ML models (best_model, scaler, feature_selector)
-Processes data through ML pipeline (feature extraction → selection → scaling → prediction)
-Returns fraud prediction (Fraud or Not, with probability scores and risk levels)
+
+Extracts & processes features (selection → scaling → prediction)
+
+Predicts fraud probability and risk levels
+
+Returns structured JSON response (fraud probability, risk, confidence, etc.)
+
+Logs all verification activity into an audit CSV
+
 📋 Complete Flow
-Frontend Request
-    ↓
+
+Frontend Request → Backend Processing → Response → Frontend Display
+
+1️⃣ Frontend Request
 POST /api/verify-kyc
 {
   "name": "John Doe",
@@ -16,73 +31,75 @@ POST /api/verify-kyc
   "address": "123 Main St",
   "documentType": "AADHAR"
 }
-    ↓
-Backend Processing
-    ↓
-1. Extract Features from input data
-2. Apply Feature Selection (if model available)
-3. Scale Features (if scaler available)
-4. Run ML Model Prediction
-5. Calculate Risk Level (Low/Medium/High)
-6. Log to Audit File
-    ↓
-Response
+
+2️⃣ Backend Processing
+
+Extract features
+
+Apply feature selection
+
+Scale features
+
+Run ML model
+
+Compute fraud probability
+
+Assign risk level
+
+Log entry
+
+3️⃣ Response
 {
-  "status": "Verified" | "Flagged",
+  "status": "Verified",
   "fraudProbability": 25.5,
   "riskLevel": "Low",
-  "confidence": 74.5,
-  ...
+  "confidence": 74.5
 }
-    ↓
-Frontend Displays Results
+
 🚀 Quick Start
-1. Install Dependencies
+Install Dependencies
 cd backend
 pip install -r requirements.txt
-2. Run Server
+
+Run Server
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
-The API will be available at: http://localhost:8000
 
-3. Test It
-Visit http://localhost:8000 in browser to see API status.
 
-Or use curl:
+API will run at:
+➡️ http://localhost:8000
 
+Test With CURL
 curl -X POST "http://localhost:8000/api/verify-kyc" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Test User",
-    "documentNumber": "123456789012",
-    "address": "Test Address",
-    "documentType": "AADHAR"
-  }'
+-H "Content-Type: application/json" \
+-d '{ "name": "Test User", "documentNumber": "123456789012", "address": "Test Address", "documentType": "AADHAR" }'
+
 📁 File Structure
 backend/
 ├── main.py                    # Main FastAPI application
-├── requirements.txt          # Python dependencies
-├── best_model (1).pkl        # Trained ML model
-├── scaler (1).pkl            # Feature scaler
-├── feature_selector (1).pkl  # Feature selector
-├── output_of_GNN_part2-1.csv # GNN results (fallback)
-├── kyc_audit_log.csv         # Audit log (auto-created)
-├── BACKEND_ANALYSIS.md       # Analysis document
-├── IMPLEMENTATION_GUIDE.md   # Detailed guide
-└── README.md                 # This file
+├── requirements.txt           # Python dependencies
+├── best_model (1).pkl         # Trained ML model
+├── scaler (1).pkl             # Feature scaler
+├── feature_selector (1).pkl   # Feature selector
+├── output_of_GNN_part2-1.csv  # GNN results (fallback)
+├── kyc_audit_log.csv          # Audit log (auto-created)
+├── BACKEND_ANALYSIS.md        # Analysis document
+├── IMPLEMENTATION_GUIDE.md    # Detailed guide
+└── README.md                  # This file
+
 🔌 API Endpoints
-POST /api/verify-kyc (Main Endpoint)
-Purpose: Verify KYC data and get fraud prediction
+✅ POST /api/verify-kyc
 
-Request Body (JSON):
+Purpose: Run KYC verification & fraud prediction.
 
+Request Body
 {
   "name": "John Doe",
   "documentNumber": "123456789012",
   "address": "123 Main St, City",
   "documentType": "AADHAR"
 }
-Response:
 
+Response
 {
   "status": "Verified",
   "id": "VER1703123456789",
@@ -99,11 +116,12 @@ Response:
   },
   "message": "Face & ID match successful"
 }
-GET /
-Purpose: Health check and model status
 
-Response:
+✅ GET /
 
+Health check & model load status
+
+Response
 {
   "message": "✅ KYC Verification API running",
   "status": "operational",
@@ -113,65 +131,89 @@ Response:
     "feature_selector": "✅ Loaded"
   }
 }
-GET /api/history
-Purpose: Get verification history
 
-Response: Array of verification records from audit log
+✅ GET /api/history
+
+Fetches verification history from audit log.
 
 🧠 How It Works
-Model Loading
-Models are loaded once at server startup
-If a model file is missing, the system logs a warning but continues
-Falls back to GNN CSV data if models unavailable
-Feature Engineering
-The backend extracts features from input data:
+🔹 Model Loading
 
-Text lengths (name, document number, address)
-Document validation flags
-Document type encoding (AADHAR=0, PAN=1, UTILITY=2)
-Address word count
-Name analysis (uppercase, digits)
-Prediction Pipeline
-Extract features from input
-Apply feature selection (if available)
-Scale features (if scaler available)
-Run model prediction
-Convert probability to risk level:
-< 33%: Low risk
-33-67%: Medium risk
-67%: High risk
+Models load once at startup
 
-Error Handling
-Missing models: Falls back to GNN CSV or safe defaults
-Invalid input: Returns HTTP 400 with error message
-Prediction errors: Logs error and returns safe values
-All operations are logged
+If missing, backend continues with fallback
+
+Alerts shown in logs
+
+🔹 Feature Engineering
+
+Features extracted automatically such as:
+
+Text lengths
+
+Word counts
+
+Document type encoding
+
+Uppercase/digit counts
+
+Validation flags
+
+🔹 Prediction Pipeline
+
+Extract features
+
+Feature selection (optional)
+
+Scale features
+
+Model prediction
+
+Convert probability → risk level
+
+<33% = Low
+
+33–67% = Medium
+
+>67% = High
+
+🔹 Error Handling
+
+Missing models → fallback
+
+Invalid data → HTTP 400
+
+Prediction errors → safe response + logged
+
 🔧 Configuration
-Model Files
-Place your trained models in the backend/ directory:
+Model Files (Place in backend/)
 
-best_model (1).pkl - Main prediction model
-scaler (1).pkl - Feature scaler
-feature_selector (1).pkl - Feature selector (optional)
-Port Configuration
-Default port: 8000 Change in main.py or use uvicorn command:
+best_model (1).pkl
 
+scaler (1).pkl
+
+feature_selector (1).pkl
+
+Change Port
 uvicorn main:app --port 8080
+
 📊 Logging
-All operations are logged:
 
-Model loading status
+Logs include:
+
+Model load status
+
 Prediction requests
-Errors and warnings
-Audit trail in kyc_audit_log.csv
-🔗 Frontend Integration
-The frontend should call the API like this:
 
+Errors & warnings
+
+Full audit trail (kyc_audit_log.csv)
+
+🔗 Frontend Integration
+Example Fetch Call
 const response = await fetch('http://localhost:8000/api/verify-kyc', {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     name: formData.name,
     documentNumber: formData.aadharNumber,
@@ -181,38 +223,54 @@ const response = await fetch('http://localhost:8000/api/verify-kyc', {
 });
 
 const result = await response.json();
-// result contains: status, fraudProbability, riskLevel, etc.
+
 ⚠️ Important Notes
-Feature Engineering: The extract_features() function may need adjustment based on how your model was trained. If your model expects different features, modify this function.
 
-Model Compatibility: Ensure your pickle files are compatible with the scikit-learn version installed.
+Modify extract_features() if model input format changes
 
-CORS: Currently allows all origins (*). For production, restrict to your frontend domain.
+Ensure pickle versions match installed scikit-learn
 
-Model Files: The backend will work even if some model files are missing, but predictions will be less accurate.
+CORS currently allows all origins (*) — restrict later
+
+Backend still works without model files (but less accurate)
 
 🐛 Troubleshooting
-Models not loading?
-Check file paths in main.py
-Ensure pickle files are in backend/ directory
-Check Python version compatibility
-Predictions seem wrong?
-Verify feature extraction matches training data format
-Check model file compatibility
-Review logs for errors
-Port already in use?
-# Find process using port 8000
+✔ Models not loading?
+
+Check file names & paths
+
+Ensure compatible Python version
+
+✔ Wrong predictions?
+
+Verify feature engineering
+
+Check training vs inference features
+
+✔ Port issues?
 netstat -ano | findstr :8000
-# Kill process or use different port
 uvicorn main:app --port 8001
+
 📝 Next Steps
-Customize Feature Engineering: Adjust extract_features() to match your training data
-Add Image Processing: If you need to process ID/selfie images, add computer vision logic
-Database Integration: Replace CSV logging with database
-Authentication: Add API keys or JWT tokens for security
-Rate Limiting: Add rate limiting to prevent abuse
+
+Improve feature engineering
+
+Add image (ID/selfie) verification
+
+Replace CSV logs with database
+
+Add authentication (API keys/JWT)
+
+Add rate limiting
+
 📚 Documentation
-BACKEND_ANALYSIS.md - Analysis of what was needed
-IMPLEMENTATION_GUIDE.md - Detailed technical guide
-README.md - This file
-Ready to use! Start the server and connect your frontend. 🚀
+
+BACKEND_ANALYSIS.md – Explanation of workflow
+
+IMPLEMENTATION_GUIDE.md – Step-by-step implementation
+
+README.md – This file
+
+🎉 Ready to Use!
+
+Start your server and connect your frontend — your full KYC system is operational.
