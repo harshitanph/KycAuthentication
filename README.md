@@ -9,7 +9,7 @@ Built using ⚡ FastAPI, 🤖 Machine Learning models, and 🧠 intelligent feat
 
 This project unifies AI + automation + security to deliver fast, accurate, and compliant digital onboarding.
 
-🚀 Why KycAuthentication?
+🚀 Why Kyc Authentication?
 
 Modern platforms need smart identity verification because manual KYC checks are:
 
@@ -19,7 +19,7 @@ Modern platforms need smart identity verification because manual KYC checks are:
 
 ❌ Error-prone
 
-KycAuthentication automates the entire process with:
+Kyc Authentication automates the entire process with:
 
 🔎 ML-based fraud detection
 
